@@ -49,7 +49,7 @@ public class Main {
         
         long endTime = System.currentTimeMillis();
         System.out.print("Connected!");
-        System.out.print(" Time: " + (endTime - startTime) + "\n\n");
+        System.out.print(" Time: " + (endTime - startTime)/1000.0 + "s \n\n");
         
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         String input = br.readLine();
