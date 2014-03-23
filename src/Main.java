@@ -9,25 +9,43 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Scanner;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 public class Main {
     
     private static String username;
     private static String password;
     
-    private static final String loginInfo = "login.txt";
+    private static final String loginFile = "login.txt";
     private static final String baseURL = "https://gradebook-web-api.herokuapp.com/";
     
     public static void main(String[] args) {
         try {
             initializeLoginInfo();
         } catch (FileNotFoundException e) {
-            System.out.println("File not found: " + e);
+            System.out.println("Fatal: File not found: " + e);
+            return;
         }
+        
+        String rawData;
+        
         try {
-            System.out.println(getGradebookContent());
+            rawData = getGradebookContent();
         } catch (IOException e) {
-            System.out.println("Failed to get content: " + e);
+            System.out.println("Fatal: Failed to get content: " + e);
+            return;
+        }
+        
+        System.out.println(rawData);
+        
+        try {
+            parse(rawData);
+        } catch (ParseException e) {
+            System.out.println("Fatal: Failed to parse: " + e);
+            return;
         }
     }
     
@@ -59,8 +77,18 @@ public class Main {
     }
     
     private static void initializeLoginInfo() throws FileNotFoundException {
-        Scanner scanner = new Scanner(new FileReader(new File("login.txt")));
+        Scanner scanner = new Scanner(new FileReader(new File(loginFile)));
         username = scanner.nextLine();
         password = scanner.nextLine();
+    }
+    
+    private static void parse(String rawData) throws ParseException {
+        JSONParser parser = new JSONParser();
+        JSONObject data = (JSONObject) parser.parse(rawData);
+        JSONArray classes = (JSONArray) data.get("courses");
+        
+        JSONObject class1 = (JSONObject) classes.get(0);
+        String className = (String) class1.get("course");
+        System.out.println(className);
     }
 }
