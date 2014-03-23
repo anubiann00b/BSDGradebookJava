@@ -9,7 +9,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Scanner;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -21,6 +20,9 @@ public class Main {
     
     private static final String loginFile = "login.txt";
     private static final String baseURL = "https://gradebook-web-api.herokuapp.com/";
+    
+    private static JSONObject data = null;
+    private static boolean run = true;
     
     public static void main(String[] args) {
         try {
@@ -38,15 +40,48 @@ public class Main {
             System.out.println("Fatal: Failed to get content: " + e);
             return;
         }
-        
-        System.out.println(rawData);
-        
+                
         try {
             parse(rawData);
         } catch (ParseException e) {
             System.out.println("Fatal: Failed to parse: " + e);
             return;
         }
+        
+        BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
+        
+        String s = null;
+        
+        while (run) {
+            System.out.println("Enter a command, type \"exit\", or type \"help\"");
+            try {
+                s = console.readLine();
+            } catch (IOException e) {
+                System.out.println("Error parsing input: " + e);
+            }
+            
+            switch(s) {
+                case "exit":
+                    run = false;
+                    break;
+                case "help":
+                    printHelp();
+                    break;
+                case "raw":
+                    System.out.println(rawData);
+                    break;
+                default:
+                    System.out.println("Unrecognized command.");
+            }
+            
+            System.out.println();
+        }
+    }
+    
+    private static void printHelp() {
+        System.out.println("~le help");
+        System.out.println(" Commands:");
+        System.out.println("    raw | prints raw data");
     }
     
     private static String getGradebookContent() throws IOException {
@@ -84,11 +119,6 @@ public class Main {
     
     private static void parse(String rawData) throws ParseException {
         JSONParser parser = new JSONParser();
-        JSONObject data = (JSONObject) parser.parse(rawData);
-        JSONArray classes = (JSONArray) data.get("courses");
-        
-        JSONObject class1 = (JSONObject) classes.get(0);
-        String className = (String) class1.get("course");
-        System.out.println(className);
+        data = (JSONObject) parser.parse(rawData);
     }
 }
